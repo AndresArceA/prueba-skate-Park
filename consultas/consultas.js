@@ -1,0 +1,227 @@
+//const { response } = require("express");
+const { json } = require("express/lib/response.js");
+const {pool} = require("../config/db.js");
+
+// importo archivo para manejo de errores
+const {errores} = require("../error/Errores.js");
+
+
+//nombre de la tabla; se agrega tabla vacía y tabla no existente para manejar errores
+const tabla = "skaters";
+//const tabla = "skaters2";//tabla vacía
+//const tabla = "ninguna";
+
+//defino funcion para consultar si existe un usuario registrado
+let existeSkater;
+
+
+//agregar skater
+
+// const agregaskater = async (email, nombre, password, anos, esp, pathPhoto) => {
+//   try {
+//     //Convierto parametros a minusculas para verificacion
+//     const emailmin = email.trim().toLowerCase();
+//     // const nombremin = nombre.trim().toLowerCase();
+//     // const espmin = esp.trim().toLowerCase();
+
+//     //Defino variable de estado en false por defecto
+//     const estado = false;
+
+//     //verifico si el skater ya existe en la tabla
+//     existeSkater = await pool.query({
+//       text: `SELECT * FROM ${tabla} WHERE LOWER(TRIM(email)) = LOWER(TRIM($1)) `, // AND LOWER(TRIM(artista)) = LOWER(TRIM($2)) AND LOWER(TRIM(tono)) = LOWER(TRIM($3))`,
+//       values: [emailmin],
+//     });
+//     console.log(existeSkater.rowCount);
+//     if (existeSkater.rowCount > 0) {
+//       return response(401).send(`
+//         <script>
+//            alert('El Email ${email} ya se encuentra registrado, inicie sesión o registrese con otro email')
+//            </script>`)      
+//     }
+//     //si no existe, agrego al skater
+//     const result = await pool.query({
+//       text: `INSERT INTO ${tabla} (email, nombre, password, anos_experiencia, especialidad, foto, estado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+//       values: [email, nombre, password, anos, esp, pathPhoto, estado],
+//     });
+//     console.log(`Usuari@ ${nombre} con ${email} registrad@ con éxito`);
+//     console.log("Skater agregad@: ", result.rows[0]);
+//     //console.log(result.rows[0])
+//     res.status(200).send(`
+//       <script>
+//       alert('El participante ${nombre} con email: ${email} ha sido registrado con éxito.');// Devuelve los datos del participante registrado
+//         </script>`)
+//   } catch (error) {
+//     console.log("Error al agregar el participante");
+//     const EE = errores(error.code, error.status, error.message);
+//     console.log(
+//       "Status ",
+//       EE.status,
+//       " |Error Cod. ",
+//       EE.code,
+//       "|",
+//       EE.message
+//     );
+//     res.status(500).send(`
+//         <script>
+//            alert(EE);          
+//            </script>`)  
+// };
+// };
+
+const agregaskater = async (email, nombre, password, anos, esp, pathPhoto) => {
+  try {
+    // Convierto parámetros a minúsculas para verificación
+    const emailmin = email.trim().toLowerCase();
+
+    // Defino variable de estado en false por defecto
+    const estado = false;
+
+    // Verifico si el skater ya existe en la tabla
+    const existeSkater = await pool.query({
+      text: `SELECT * FROM ${tabla} WHERE LOWER(TRIM(email)) = LOWER(TRIM($1))`,
+      values: [emailmin],
+    });
+
+    if (existeSkater.rowCount > 0) {
+      return { success: false, message: `El Email ${email} ya se encuentra registrado, inicie sesión o registrese con otro email` };
+    }
+
+    // Si no existe, agrego al skater
+    const result = await pool.query({
+      text: `INSERT INTO ${tabla} (email, nombre, password, anos_experiencia, especialidad, foto, estado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      values: [email, nombre, password, anos, esp, pathPhoto, estado],
+    });
+
+    return { success: true, message: `El participante ${nombre} con email: ${email} ha sido registrado con éxito.` };
+  } catch (error) {
+    console.log("Error al agregar el participante");
+    console.error(error);
+    return { success: false, message: "Error al agregar el participante." };
+  }
+};
+
+
+//--------------------------------------------------------------
+
+//lista todas los participantes
+
+const listaSkaters = async () => {
+  try {
+    const res = await pool.query({
+      // consulta para listar todas los skaters
+           text: `SELECT * FROM ${tabla}`,
+    });
+    // bloque if para validar que la tabla está vacía
+    if (res.rowCount == 0) {
+      console.log(
+        `No existen Participantes en el registro; favor agregar y repetir la consulta.`
+      );
+      return {statusCode: 204, message: "No existen Participantes en el registro; favor agregar y repetir la consulta." };
+    } else {
+      console.log(`Skaters registrados`, res.rows);
+      // Devuelve los resultados de la consulta 
+      return  res.rows;
+    }
+  } catch (error) {
+    const EE = errores(error.code, error.status, error.message);
+    console.log(
+      "Status ",
+      EE.status,
+      " |Error Cod. ",
+      EE.code,
+      "|",
+      EE.message
+    );
+    return EE;
+  }
+};
+
+
+//----------------------------------------------------
+
+//editar Skater
+
+const editaSkater = async (email, nombre, password, anos, esp) => {
+  try {
+    //verifico si la canción ya existe en la tabla
+    // existeSkater = await pool.query({
+    //   text: `SELECT * FROM ${tabla} WHERE id = $1`,
+    //   values: [id],
+    // });
+    console.log(existeSkater);
+    if (existeSkater.rowCount === 0) {
+      return `El participante ${id} con ${titulo} de ${artista} no existe en el repertorio, seleccione una existente para editar.`;
+      }else{
+    
+    //si existe, modifico la canción
+    const result = await pool.query({
+      text: `UPDATE ${tabla} SET titulo = $2, artista = $3, tono = $4 WHERE id = $1 RETURNING *;`,
+      values: [id, titulo, artista, tono],
+    });
+    console.log(`Canción ${titulo} de ${artista} actualizada con éxito`);
+    console.log("Canción Editada: ", result.rows[0]);
+    console.log(result.rows[0]);
+    return `La canción ${titulo} de ${artista} fue editada correctamente.`}; // Devuelve los datos de la canción editada
+  } catch (error) {
+    console.log("Error al editar la canción");
+    const EE = errores(error.code, error.status, error.message);
+    console.log(
+      "Status ",
+      EE.status,
+      " |Error Cod. ",
+      EE.code,
+      "|",
+      EE.message
+    );
+    return EE;
+  }
+};
+
+//---------------------------
+
+//eliminar canción
+
+const borracancion = async (id) => {
+  try {
+    //verifico si la canción ya existe en la tabla
+    const existeCancion = await pool.query({
+      text: `SELECT * FROM ${tabla} WHERE id = $1`,
+      values: [id],
+    });
+    console.log(existeCancion);
+    if (existeCancion.rowCount === 0) {
+      return `La canción con el ID ${id} no existe en el repertorio, seleccione una existente para eliminar.`;
+    }else{
+    
+    //si existe, elimino el registro
+      const result = await pool.query({
+      text: `DELETE FROM ${tabla} WHERE id = $1 RETURNING *;`,
+      values: [id]
+    });
+    const cancion = result.rows[0];
+    console.log(`Canción ${cancion.id} ${cancion.titulo} de ${cancion.artista} eliminada con éxito`);
+    console.log("Canción Eliminada: ", cancion);
+    console.log(result.rows[0]);
+    return `La canción con Id ${cancion.id} ${cancion.titulo} de ${cancion.artista} fue eliminada correctamente.`}; // Devuelve los datos de la canción agregada
+  } catch (error) {
+    console.log("Error al eliminar la canción");
+    const EE = errores(error.code, error.status, error.message);
+    console.log(
+      "Status ",
+      EE.status,
+      " |Error Cod. ",
+      EE.code,
+      "|",
+      EE.message
+    );
+    return EE;
+  }
+};
+
+module.exports = {agregaskater,listaSkaters,editaSkater};
+
+console.log('Archivo de consultas cargado con éxito 👌');
+
+
+

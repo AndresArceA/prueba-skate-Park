@@ -1,0 +1,53 @@
+<div class="py-4">
+    <h2>Registro</h2>
+    <hr class="w-50" />
+
+    <form action="/skaters" method="POST" enctype="multipart/form-data" onsubmit="return validaformulario()">
+        <div class="form-group row w-50 m-auto">
+            <div class="form-group col-12 col-sm-6">
+                <label>Email</label>
+                <input class="form-control m-auto" name="email" />
+            </div>
+            <div class="form-group col-12 col-sm-6">
+                <label>Nombre</label>
+                <input class="form-control m-auto" name="nombre" />
+            </div>
+            <div class="form-group col-12 col-sm-6">
+                <label>Password</label>
+                <input id="password" class="form-control m-auto" type="password" name="password" />
+            </div>
+            <div class="form-group col-12 col-sm-6">
+                <label>Repita la password</label>
+                <input id ="repitaPassword" class="form-control m-auto" type="password" name="password2"/>
+            </div>
+            <div class="form-group col-12 col-sm-6">
+                <label>Años de experiencia</label>
+                <input class="form-control m-auto" name="anos" />
+            </div>
+            <div class="form-group col-12 col-sm-6">
+                <label>Especialidad</label>
+                <input class="form-control m-auto" name="esp" />
+            </div>
+            <div class="form-group col-12 col-sm-12">
+                <label>Foto de perfil</label>
+                <input type="file" name="foto" />
+            </div>
+        </div>
+        <button class="btn btn-info mb-3">Registrarme</button>
+        <p><a href="/login"> Iniciar sesión</a></p>
+    </form>
+</div>
+{{!-- ---------------Agrego script para validar contraseñas--------- --}}
+
+<script>
+    function validaformulario() {
+       const password = document.getElementById("password").value;
+       const repitaPassword = document.getElementById("repitaPassword").value;
+        if (password !== repitaPassword) {
+            alert("Las contraseñas no coinciden");
+            return false; // detiene el envio del formulario
+            }else{
+                return true; // permite que se envíe el formulario
+            }
+    }
+</script>
