@@ -180,6 +180,36 @@ const editaSkater = async (email, nombre, password, anos, esp) => {
 
 //---------------------------
 
+//consulta email y password para validacion login
+const validaLogin = async (email, password) => {
+  try {
+    const result = await pool.query({
+      text: `SELECT * FROM ${tabla} WHERE email = $1 AND password = $2`,
+      values: [email, password],
+      });
+      //console.log(result.rows[0]);
+      if (result.rowCount === 0) {
+        return `El datos de acceso inválidos, por favor reintente.`;
+        } else {
+          return {email,password};
+          }
+          } catch (error) {
+            console.log("Error al validar el usuario");
+            const EE = errores(error.code, error.status, error.message);
+            console.log(
+              "Status ",
+              EE.status,
+              " |Error Cod. ",
+              EE.code,
+              "|",
+              EE.message
+              );
+              return EE;
+              }
+              };
+             
+
+
 //eliminar canción
 
 const borracancion = async (id) => {
@@ -219,7 +249,7 @@ const borracancion = async (id) => {
   }
 };
 
-module.exports = {agregaskater,listaSkaters,editaSkater};
+module.exports = {agregaskater,listaSkaters,editaSkater,validaLogin};
 
 console.log('Archivo de consultas cargado con éxito 👌');
 

@@ -42,7 +42,7 @@ const secretKey = "elhuachimingo";
 
 // importo funciones
 
-const {agregaskater,listaSkaters,editaSkater} = require("./consultas/consultas.js") 
+const {agregaskater,listaSkaters,editaSkater,validaLogin} = require("./consultas/consultas.js") 
 
 
 // Server
@@ -123,11 +123,11 @@ app.get("/login", (req, res) => {
 app.post("/login", async (req, res) => {
     const { email, password } = req.body
     try {
-        const skater = skaters.find((s) => s.email == email && 
-                                         s.password == password);
-        
+        const skater = await validaLogin(email,password);
+        console.log("Skater:" + JSON.stringify(skater));
+        if (skater) {        
         const token = jwt.sign(skater, secretKey)
-        res.status(200).send(token)
+        res.status(200).send(token)}
 
     } catch (e) {
 
@@ -279,6 +279,8 @@ app.get("/skaters", async (req, res) => {
 //     });
 // });
 
+// ruta  POST /skaters para agregar participante
+
 app.post("/skaters", async (req, res) => {
     const { email, nombre, password, anos, esp } = req.body;
 
@@ -340,21 +342,9 @@ app.post("/skaters", async (req, res) => {
         });
     }
 });
-    // foto.mv(`${__dirname}/public${pathPhoto}`, async (err) => {
-    //     try {
-    //         if (err) throw err
-    //         skater.foto = pathPhoto
-    //         skaters.push(skater);
-    //         res.status(201).redirect("/");
-    //     } catch (e) {
-    //         console.log(e)
-    //         res.status(500).send({
-    //             error: `Algo salió mal... ${e}`,
-    //             code: 500
-    //         })
-    //     };
+   
 
-    // });
+// ruta PUT /Skaters para editar un participante
 
 app.put("/skaters", async (req, res) => {
     const {id, nombre,anos_experiencia, especialidad} = req.body;
