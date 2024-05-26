@@ -25,10 +25,10 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault()
 
-    let [email, password] = document.querySelectorAll("input")
+    let [email, password] = document.querySelectorAll("input");
 
-    email = email.value
-    password = password.value
+    email = email.value;
+    password = password.value;
 
     try {
       const { data: token } = await axios.post("/login", { email, password })

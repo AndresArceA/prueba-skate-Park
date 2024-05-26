@@ -121,23 +121,36 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-    const { email, password } = req.body
-    try {
-        const skater = await validaLogin(email,password);
-        console.log("Skater:" + JSON.stringify(skater));
-        if (skater) {        
-        const token = jwt.sign(skater, secretKey)
-        res.status(200).send(token)}
+  const { email, password } = req.body;
 
-    } catch (e) {
+ // Valido que el email y el password se ingresen
+ if (!email || !password) {
+    return res.status(400).send({
+        error: "Debe proporcionar el correo electrónico y la contraseña.",
+        code: 400,
+      });
+  }
 
-        console.log(e)
-        res.status(500).send({
-            error: `Algo salió mal... ${e}`,
-            code: 500
-        })
-        
-    };
+  try {
+    const skater = await validaLogin(email, password); // Llamada a la función de consulta bd para validar usuario
+    console.log("Skater:", JSON.stringify(skater));
+    
+    if (!skater) {
+      return res.status(401).send({
+        error: "Debe proporcionar todos los valores correctamente para ingresar.",
+        code: 401,
+      });
+    } else {
+      const token = jwt.sign(skater, secretKey); //Genero el token con los datos del skater
+      res.status(200).send(token);
+    } //envío el token como respuesta
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({
+      error: `Algo salió mal... ${e}`,
+      code: 500,
+    });
+  }
 });
 
 app.get("/Admin", async (req, res) => {
@@ -327,7 +340,7 @@ app.post("/skaters", async (req, res) => {
                 return res.send(`
                 <script>
                 alert("${addSkater.message}");
-                window.location.href = "/registro";
+                window.location.href = '${"/"}';
                 </script>
             `);
             } catch (error) {

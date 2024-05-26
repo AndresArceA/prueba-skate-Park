@@ -189,7 +189,8 @@ const validaLogin = async (email, password) => {
       });
       //console.log(result.rows[0]);
       if (result.rowCount === 0) {
-        return `El datos de acceso inválidos, por favor reintente.`;
+        console.log('Datos de acceso inválidos, por favor reintente.');
+        return null; 
         } else {
           return {email,password};
           }
@@ -204,7 +205,7 @@ const validaLogin = async (email, password) => {
               "|",
               EE.message
               );
-              return EE;
+              throw EE;
               }
               };
              
