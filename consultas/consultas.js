@@ -11,63 +11,8 @@ const tabla = "skaters";
 //const tabla = "skaters2";//tabla vacía
 //const tabla = "ninguna";
 
-//defino funcion para consultar si existe un usuario registrado
-let existeSkater;
-
 
 //agregar skater
-
-// const agregaskater = async (email, nombre, password, anos, esp, pathPhoto) => {
-//   try {
-//     //Convierto parametros a minusculas para verificacion
-//     const emailmin = email.trim().toLowerCase();
-//     // const nombremin = nombre.trim().toLowerCase();
-//     // const espmin = esp.trim().toLowerCase();
-
-//     //Defino variable de estado en false por defecto
-//     const estado = false;
-
-//     //verifico si el skater ya existe en la tabla
-//     existeSkater = await pool.query({
-//       text: `SELECT * FROM ${tabla} WHERE LOWER(TRIM(email)) = LOWER(TRIM($1)) `, // AND LOWER(TRIM(artista)) = LOWER(TRIM($2)) AND LOWER(TRIM(tono)) = LOWER(TRIM($3))`,
-//       values: [emailmin],
-//     });
-//     console.log(existeSkater.rowCount);
-//     if (existeSkater.rowCount > 0) {
-//       return response(401).send(`
-//         <script>
-//            alert('El Email ${email} ya se encuentra registrado, inicie sesión o registrese con otro email')
-//            </script>`)      
-//     }
-//     //si no existe, agrego al skater
-//     const result = await pool.query({
-//       text: `INSERT INTO ${tabla} (email, nombre, password, anos_experiencia, especialidad, foto, estado) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-//       values: [email, nombre, password, anos, esp, pathPhoto, estado],
-//     });
-//     console.log(`Usuari@ ${nombre} con ${email} registrad@ con éxito`);
-//     console.log("Skater agregad@: ", result.rows[0]);
-//     //console.log(result.rows[0])
-//     res.status(200).send(`
-//       <script>
-//       alert('El participante ${nombre} con email: ${email} ha sido registrado con éxito.');// Devuelve los datos del participante registrado
-//         </script>`)
-//   } catch (error) {
-//     console.log("Error al agregar el participante");
-//     const EE = errores(error.code, error.status, error.message);
-//     console.log(
-//       "Status ",
-//       EE.status,
-//       " |Error Cod. ",
-//       EE.code,
-//       "|",
-//       EE.message
-//     );
-//     res.status(500).send(`
-//         <script>
-//            alert(EE);          
-//            </script>`)  
-// };
-// };
 
 const agregaskater = async (email, nombre, password, anos, esp, pathPhoto) => {
   try {
@@ -226,31 +171,7 @@ const validaLogin = async (email, password) => {
 
 
 //eliminar skater
-// const borraskater = async (id) => {
-//   try {
-//       const result = await pool.query({
-//       text: `DELETE FROM ${tabla} WHERE id = $1 RETURNING *;`,
-//       values: [id]
-//     });
-//     const skat = result.rows[0];
-//     console.log(`Participante ${skat.id} registrado con ${skat.email} eliminado con éxito`);
-//     console.log("Participante Eliminado: ", cancion);
-//     console.log(result.rows[0]);
-//     return { success: true, message:`Participante ${skat.id} registrado con ${skat.email} eliminado con éxito`}; // Devuelve los datos del participante eliminado
-//   } catch (error) {
-//     console.log("Error al eliminar el registro");
-//     const EE = errores(error.code, error.status, error.message);
-//     console.log(
-//       "Status ",
-//       EE.status,
-//       " |Error Cod. ",
-//       EE.code,
-//       "|",
-//       EE.message
-//     );
-//     return { success: false, message: EE.message };
-//   }
-// };
+
 const borraskater = async (id) => {
   try {
     const result = await pool.query({
@@ -282,7 +203,33 @@ const borraskater = async (id) => {
   }
 };
 
-module.exports = {agregaskater,listaSkaters,editaSkater,validaLogin,borraskater};
+//editar estado de inscripcion
+
+const estadoSK = async (id,estado) => {
+  try {
+    const result = await pool.query({
+      text: `UPDATE ${tabla} SET estado = $2 WHERE id = $1 RETURNING *;`,
+      values: [id,estado],
+    });
+    console.log(`Skater ${id}, su estado actual es ${estado}`);
+    //console.log("Participante Editado: ", result.rows[0]);
+    return { success: true, message: `El participante ${id} ha actualizado sus datos correctamente.`}; // Devuelve respuesta de actualización
+  } catch (error) {
+    console.log("Error al cambiar estado del participante");
+    const EE = errores(error.code, error.status, error.message);
+    console.log(
+      "Status ",
+      EE.status,
+      " | Error Cod. ",
+      EE.code,
+      " | ",
+      EE.message
+    );
+    return { success: false, message: EE.message }; // Corrección del retorno de errores
+  }
+};
+
+module.exports = {agregaskater,listaSkaters,editaSkater,validaLogin,borraskater,estadoSK};
 
 console.log('Archivo de consultas cargado con éxito 👌');
 

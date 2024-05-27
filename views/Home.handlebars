@@ -48,11 +48,11 @@
       const skaters = response.data;
       const $tableBody = $('#tabla-skaters');
 
-      // Verificar si la respuesta del servidor indica que no hay datos disponibles
+      // Verifico si la respuesta del servidor indica que no hay datos disponibles
       if (response.status === 204) {
         alert("No existen Participantes en el registro; favor agregar y repetir la consulta.");
       } else {
-        // Iterar sobre los skaters y actualizar la tabla
+        // Itero sobre los skaters y actualizar la tabla
         $.each(skaters, function(index, skater) {
           const $row = $('<tr>');
           $row.append(`<td>${skater.id}</td>`);

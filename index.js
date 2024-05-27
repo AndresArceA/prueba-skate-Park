@@ -4,49 +4,28 @@ const app = express();
 const exphbs = require("express-handlebars");
 const expressFileUpload = require('express-fileupload');
 const jwt = require("jsonwebtoken");
-const secretKey = "elhuachimingo";
+const path = require('path');
+const fs = require('fs');
+
+//configuro carpeta publica para imagenes
+
+app.use(express.static(path.join(__dirname, "/assets/img")));
 
 
-// const skaters = [
-//     {
-//       id: 1,
-//       email: 'kb@fbi.com',
-//       nombre: 'Kill Bill',
-//       password: 'me',
-//       anos_experiencia: 4,
-//       especialidad: "FullStack",
-//       foto: "/uploads/Danny.jpg",
-//       estado: false
-//     },
-//     {
-//         id: 2,
-//         email: 'fg@fbi.com',
-//         nombre: 'Forrest Gump',
-//         password: 'you',
-//         anos_experiencia: 6,
-//         especialidad: "DBA",
-//         foto: "/uploads/Danny.jpg",
-//         estado: true
-//     },
-//     {
-//         id: 3,
-//         email: 'jm@fbi.com',
-//         nombre: 'Jonh Meyers',
-//         password: 'he',
-//         anos_experiencia: 8,
-//         especialidad: "FrontEnd",
-//         foto: "/uploads/Danny.jpg",
-//         estado: true
-//     },
-//   ]
+//defino la secret key
+const secretKey = "elHuachimingo";
+
+
 
 // importo funciones
 
-const {agregaskater,listaSkaters,editaSkater,validaLogin, borraskater} = require("./consultas/consultas.js") 
+const {agregaskater,listaSkaters,editaSkater,validaLogin, borraskater,estado, estadoSK} = require("./consultas/consultas.js") 
 
 
-// Server
-app.listen(3000, () => console.log("Servidor encendido PORT 3000!"));
+// Defino Puerto para el Servidor
+const PORT = 3000;
+//Arranco Servidor
+app.listen(PORT, () => console.log(`SkatePark Server on port ${PORT} 🛹`));
 
 // Middlewares
 app.use(express.urlencoded({ extended: true }));
@@ -86,17 +65,6 @@ app.get("/", async (req, res) => {
     };
 });
 
-// app.get("/", async (req, res) => {
-//     try {
-//         const skaters = await listaSkaters(); // llamo a la funcion listaskaters
-//         res.render("Home", { skaters: skaters });
-//     } catch (e) {
-//         res.status(500).send({
-//             error: `Algo salió mal... ${e}`,
-//             code: 500
-//         });
-//     }
-// });
 
 app.get("/registro", (req, res) => {
     res.render("Registro");
@@ -142,30 +110,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// app.get("/perfil", (req, res) => {
-//     const token  = req.query.token;
-//     if (!token) {
-//         res.status(401).send(`
-//             <script>
-//                 alert("No existe el token, no está Autorizado para acceder");
-//                 window.location.href = '${"/"}';
-//             </script>`);
-//     }else{ //verifico token
-//          jwt.verify(token, secretKey, (err, skater) => {
-//         if (err) {
-//             res.status(403).send(`
-//                 <script>
-//                     alert("Token Inválido, probablememte ya expiró");
-//                     window.location.href = '${"/"}';
-//                 </script>`);
-//         } else {
-//             //const skater = skater.skater;
-//             console.log("ska:",skater);
-//             res.render("Perfil", skater);
-//             }
-//             });
-//             }
-//             });
 
 app.get("/perfil", (req, res) => {
     const { token } = req.query
@@ -185,7 +129,7 @@ app.get("/perfil", (req, res) => {
 
 app.get("/Admin", async (req, res) => {
     try {
-        res.render("Admin", { skaters });
+        res.render("Admin", {skaters});
     } catch (e) {
         res.status(500).send({
             error: `Algo salió mal... ${e}`,
@@ -197,25 +141,12 @@ app.get("/Admin", async (req, res) => {
 
 // ************************ API REST de Skaters *******************
 
-// app.get("/skaters", async (req, res) => {
-//     try {
-//         const skaters = await listaSkaters();
-//         //res.status(200).json(skaters);
-//         return skaters;
-//     } catch (e) {
-//         console.error(`Error al obtener la lista de canciones: ${e}`);
-//         res.status(500).json({
-//             error: `Algo salió mal... ${e}`,
-//             code: 500
-//         })
-//     };
-// });
-
 // ******** Ruta GET /skaters para obtener el listado de todos los inscritos *************
+let skaters;
 
 app.get("/skaters", async (req, res) => {
     try {
-        const skaters = await listaSkaters();
+        skaters = await listaSkaters();
         
         // Verificar si la lista de skaters está vacía
         if (skaters.length === 0) {
@@ -237,95 +168,6 @@ app.get("/skaters", async (req, res) => {
 });
 
 //*********** Ruta POST /skaters para registrar un nuevo participante ***********
-// app.post("/skaters", async (req, res) => {
-//     const { email, nombre, password, anos, esp} = req.body;
-//     if (!email || !nombre || !password || !anos || !esp) {
-//         //valida que se estén pasando los parametros para la consulta
-//         console.log(
-//           "Debe proporcionar todos los valores correctamente para registrarse."
-//         );
-//         res.status(401).send("Debe proporcionar todos los valores correctamente para registrarse.");
-//         return;
-//       }
-//     const { foto } = req.files;
-//     const { name } = foto;
-//     const pathPhoto = `/uploads/${name}`;
-
-//     console.log("Valor del req.body: ", req.body);
-//     console.log("Nombre de imagen: ", name);
-//     console.log("Ruta donde subir la imagen: ", pathPhoto);
-
-//     foto.mv(`${__dirname}/public${pathPhoto}`, async (err) => {
-//         res.send("Imagen Cargada con {exito");
-//         });
-//         try {
-//             const addSkater = await agregaskater(email, nombre, password, anos, esp, pathPhoto);
-//     res.json(addSkater);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({msg: "Error al agregar al participante"});
-//   }
-// });
-
-// app.post("/skaters", async (req, res) => {
-//     const { email, nombre, password, anos, esp } = req.body;
-
-//     // Validación de datos
-//     if (!email || !nombre || !password || !anos || !esp) {
-//         console.log("Debe proporcionar todos los valores correctamente para registrarse.");
-//        res.status(401).send(`
-//        <script>
-//        alert("Debe proporcionar todos los valores correctamente para registrarse.");
-//        window.location.href = "/registro";
-//        </script>
-//        `);
-//     }else{
-
-//     // Manejo de la foto
-//     const foto = req.files && req.files.foto;
-//     if (!foto) {
-//         console.log("Debe proporcionar una foto.");
-//         res.status(400).send(`
-//         <script>
-//         alert("Debe proporcionar una foto.");
-//         window.location.href = "/registro";
-//         </script>
-//     `);
-//     }
-// }   
-
-//     const { name } = foto;
-//     const pathPhoto = `/uploads/${name}`;
-
-//     foto.mv(`${__dirname}/public${pathPhoto}`, async (err) => {
-//         if (err) {
-//             console.error("Error al subir la foto:", err);
-//             res.status(500).send(`
-//             <script>
-//             alert("Error al subir la foto.");
-//             window.location.href = "/registro";
-//             </script>
-//         `);
-//         }
-
-//         console.log("Imagen cargada exitosamente.");
-//         try {
-//             // Agregar el skater a la base de datos
-//             const addSkater = await agregaskater(email, nombre, password, anos, esp, pathPhoto);
-//             console.log("Skater agregado exitosamente.");
-//             return (addSkater);
-//         } catch (error) {
-//             console.error("Error al agregar el skater:", error);
-//             return res.status(500).send(`
-//                 <script>
-//                 alert("Error al agregar al participante");
-//                 window.location.href = '${"/"}';
-//                 </script>`)
-//         }
-//     });
-// });
-
-// ruta  POST /skaters para agregar participante
 
 app.post("/skaters", async (req, res) => {
     const { email, nombre, password, anos, esp } = req.body;
@@ -417,15 +259,13 @@ app.put("/skaters/status/:id", async (req, res) => {
     const { estado } = req.body;
     console.log("Valor de estado recibido por body: ",estado)
     try {
-         const skaterB = skaters.findIndex((s) => s.id == id);
-
-        //if (skaterB !== -1) {
-            skaters[skaterB].estado = estado;
-            res.status(200).send("Estado Actualizado con éxito");
-        // } else {
-        //     res.status(400).send("No existe este Skater");
-        // }
-
+         const skaterB = estadoSK(id,estado);
+         return res.send(`
+                <script>
+                alert("${skaterB.message}");
+                window.location.href = '${"/"}';
+                </script>
+            `);
     } catch (e) {
         res.status(500).send({
             error: `Algo salió mal... ${e}`,
@@ -454,3 +294,9 @@ app.delete("/skaters/:id", async (req, res) => {
     };
 });
 
+///****************** Ruta Generica uta genérica para manejar solicitudes a rutas no existentes ********/
+
+app.get("*", (req, res) => {
+    //res.status(404).send("La ruta solicitada no existe en el servidor.");
+    res.status(404).sendFile(path.join(__dirname, "/404.html"));
+  });

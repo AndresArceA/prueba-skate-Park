@@ -10,11 +10,11 @@ switch (code) {
         break;
    case '22P02':
         status = 400;
-        message = "No existen registros de canciones para editar en el repertorio, favor agregue antes de editar.";
+        message = "No existen registros de skaters para editar en el listado, favor agregue antes de editar.";
         break;
     case '23505':
         status= 400;
-        message = "Ya existe la canción ingresada, favor ingrese una nueva.";
+        message = "Ya existe el skater favor ingrese uno nuevo.";
         break;
     case '28P01':
         message = `Autenticación de contraseña falló, revise la contraseña para el usuario '${pool.options.user}'`;

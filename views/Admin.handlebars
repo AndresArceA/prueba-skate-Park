@@ -38,6 +38,40 @@
 
 
 <script>
+  //----------------------------------------
+// Realizo solicitud GET a la ruta /skaters y actualizo la tabla con los datos recibidos
+  axios.get('/skaters')
+    .then(response => {
+      const skaters = response.data;
+      const $tableBody = $('#tabla-skaters');
+
+      // Verifico si la respuesta del servidor indica que no hay datos disponibles
+      if (response.status === 204) {
+        alert("No existen Participantes en el registro; favor agregar y repetir la consulta.");
+      } else {
+        // Itero sobre los skaters y actualizar la tabla
+        $.each(skaters, function(index, skater) {
+          const $row = $('<tr>');
+          $row.append(`<td>${skater.id}</td>`);
+          $row.append(`<td><div style="background-image: url(${skater.foto});"></div></td>`);
+          $row.append(`<td>${skater.nombre}</td>`);
+          $row.append(`<td>${skater.anos_experiencia}</td>`);
+          $row.append(`<td>${skater.especialidad}</td>`);
+          $row.append(`<td class="${skater.estado ? 'text-success' : 'text-warning'} font-weight-bold">${skater.estado ? 'Aprobado' : 'En revisión'}</td>`);
+          $tableBody.append($row);
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error al obtener los skaters:', error);
+    });
+
+
+
+
+
+
+  //******************************************
   const changeStatus = async (id, e) => {
 
     const estado = e.checked
