@@ -70,6 +70,17 @@
         nombre = nombre.value
         anos_experiencia = años_experiencia.value
         especialidad = especialidad.value
+// ----------- valido campos del formulario -------------
+         if (!nombre || !años_experiencia || !especialidad) {
+            alert("Todos los campos son obligatorios");
+            return;
+        }
+
+        if (isNaN(años_experiencia) || años_experiencia <= 0) {
+            alert("Años de experiencia debe ser un número positivo");
+            return;
+        }
+        // ------------------------------------------------------
         const skater = {
             id,
             nombre,
