@@ -225,46 +225,64 @@ const validaLogin = async (email, password) => {
              
 
 
-//eliminar canción
-
-const borracancion = async (id) => {
+//eliminar skater
+// const borraskater = async (id) => {
+//   try {
+//       const result = await pool.query({
+//       text: `DELETE FROM ${tabla} WHERE id = $1 RETURNING *;`,
+//       values: [id]
+//     });
+//     const skat = result.rows[0];
+//     console.log(`Participante ${skat.id} registrado con ${skat.email} eliminado con éxito`);
+//     console.log("Participante Eliminado: ", cancion);
+//     console.log(result.rows[0]);
+//     return { success: true, message:`Participante ${skat.id} registrado con ${skat.email} eliminado con éxito`}; // Devuelve los datos del participante eliminado
+//   } catch (error) {
+//     console.log("Error al eliminar el registro");
+//     const EE = errores(error.code, error.status, error.message);
+//     console.log(
+//       "Status ",
+//       EE.status,
+//       " |Error Cod. ",
+//       EE.code,
+//       "|",
+//       EE.message
+//     );
+//     return { success: false, message: EE.message };
+//   }
+// };
+const borraskater = async (id) => {
   try {
-    //verifico si la canción ya existe en la tabla
-    const existeCancion = await pool.query({
-      text: `SELECT * FROM ${tabla} WHERE id = $1`,
-      values: [id],
-    });
-    console.log(existeCancion);
-    if (existeCancion.rowCount === 0) {
-      return `La canción con el ID ${id} no existe en el repertorio, seleccione una existente para eliminar.`;
-    }else{
-    
-    //si existe, elimino el registro
-      const result = await pool.query({
+    const result = await pool.query({
       text: `DELETE FROM ${tabla} WHERE id = $1 RETURNING *;`,
       values: [id]
     });
-    const cancion = result.rows[0];
-    console.log(`Canción ${cancion.id} ${cancion.titulo} de ${cancion.artista} eliminada con éxito`);
-    console.log("Canción Eliminada: ", cancion);
-    console.log(result.rows[0]);
-    return `La canción con Id ${cancion.id} ${cancion.titulo} de ${cancion.artista} fue eliminada correctamente.`}; // Devuelve los datos de la canción agregada
+
+    if (result.rowCount === 0) {
+      // Maneja el caso cuando no se encuentra un registro con el ID proporcionado
+      return { success: false, message: `No se encontró un participante con el ID ${id}` };
+    }
+
+    const skat = result.rows[0];
+    console.log(`Participante ${skat.id} registrado con ${skat.email} eliminado con éxito`);
+    console.log("Participante Eliminado: ", skat);
+    return { success: true, message: `Participante ${skat.id} registrado con ${skat.email} eliminado con éxito` }; // Devuelve los datos del participante eliminado
   } catch (error) {
-    console.log("Error al eliminar la canción");
+    console.log("Error al eliminar el registro");
     const EE = errores(error.code, error.status, error.message);
     console.log(
       "Status ",
       EE.status,
-      " |Error Cod. ",
+      " | Error Cod. ",
       EE.code,
-      "|",
+      " | ",
       EE.message
     );
-    return EE;
+    return { success: false, message: EE.message };
   }
 };
 
-module.exports = {agregaskater,listaSkaters,editaSkater,validaLogin};
+module.exports = {agregaskater,listaSkaters,editaSkater,validaLogin,borraskater};
 
 console.log('Archivo de consultas cargado con éxito 👌');
 

@@ -42,7 +42,7 @@ const secretKey = "elhuachimingo";
 
 // importo funciones
 
-const {agregaskater,listaSkaters,editaSkater,validaLogin} = require("./consultas/consultas.js") 
+const {agregaskater,listaSkaters,editaSkater,validaLogin, borraskater} = require("./consultas/consultas.js") 
 
 
 // Server
@@ -411,6 +411,7 @@ app.put("/skaters", async (req, res) => {
     };
 });
 
+//***************** Ruta Put /skaters/status para editar estado de skater */
 app.put("/skaters/status/:id", async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
@@ -433,21 +434,21 @@ app.put("/skaters/status/:id", async (req, res) => {
     };
 });
 
+//*************** Ruta Delete /skaters para eliminar participante ********/
+
 app.delete("/skaters/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const skaterB = skaters.findIndex((s) => s.id == id);
-
-        if (skaterB !==-1) {
-            skaters.splice(skaterB, 1);
-            res.status(200).send("Skater Eliminado con éxito");
-        } else {
-            res.status(400).send("No existe este Skater");
-        }
-
+        const skaterB = await borraskater(id);
+        return res.send(`
+        <script>
+        alert("${skaterB.message}");
+        window.location.href = '${"/"}';
+        </script>
+    `);
     } catch (e) {
         res.status(500).send({
-            error: `Algo salió mal... ${e}`,
+            error: `Algo salió mal...1 ${e}`,
             code: 500
         })
     };
