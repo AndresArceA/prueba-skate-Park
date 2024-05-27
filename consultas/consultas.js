@@ -142,39 +142,52 @@ const listaSkaters = async () => {
 
 //editar Skater
 
-const editaSkater = async (email, nombre, password, anos, esp) => {
+// const editaSkater = async (id,nombre, anos_experiencia, especialidad) => {
+//   try {     
+//     const result = await pool.query({
+//       text: `UPDATE ${tabla} SET nombre = $2, anos_experiencia = $3, especialidad = $4 WHERE id = $1 RETURNING *;`,
+//       values: [id, nombre, anos_experiencia, especialidad],
+//     });
+//     console.log(`Skater ${nombre} con ${especialidad} actualizado con éxito`);
+//     console.log("Participante Editado: ", result.rows[0]);
+//     //console.log(result.rows[0]);
+//     return { success: true, message:`El participante ${email} ha actualizado sus datos correctamente.`}; // Devuelve respuesta de actualizacion
+//   } catch (error) {
+//     console.log("Error al editar el participante");
+//     const EE = errores(error.code, error.status, error.message);
+//     console.log(
+//       "Status ",
+//       EE.status,
+//       " |Error Cod. ",
+//       EE.code,
+//       "|",
+//       EE.message
+//     );
+//     return {EE:message};
+//   }
+// };
+
+const editaSkater = async (id, nombre, anos_experiencia, especialidad) => {
   try {
-    //verifico si la canción ya existe en la tabla
-    // existeSkater = await pool.query({
-    //   text: `SELECT * FROM ${tabla} WHERE id = $1`,
-    //   values: [id],
-    // });
-    console.log(existeSkater);
-    if (existeSkater.rowCount === 0) {
-      return `El participante ${id} con ${titulo} de ${artista} no existe en el repertorio, seleccione una existente para editar.`;
-      }else{
-    
-    //si existe, modifico la canción
     const result = await pool.query({
-      text: `UPDATE ${tabla} SET titulo = $2, artista = $3, tono = $4 WHERE id = $1 RETURNING *;`,
-      values: [id, titulo, artista, tono],
+      text: `UPDATE ${tabla} SET nombre = $2, anos_experiencia = $3, especialidad = $4 WHERE id = $1 RETURNING *;`,
+      values: [id, nombre, anos_experiencia, especialidad],
     });
-    console.log(`Canción ${titulo} de ${artista} actualizada con éxito`);
-    console.log("Canción Editada: ", result.rows[0]);
-    console.log(result.rows[0]);
-    return `La canción ${titulo} de ${artista} fue editada correctamente.`}; // Devuelve los datos de la canción editada
+    console.log(`Skater ${nombre} con especialidad ${especialidad} actualizado con éxito`);
+    console.log("Participante Editado: ", result.rows[0]);
+    return { success: true, message: `El participante ${nombre} ha actualizado sus datos correctamente.` }; // Devuelve respuesta de actualización
   } catch (error) {
-    console.log("Error al editar la canción");
+    console.log("Error al editar el participante");
     const EE = errores(error.code, error.status, error.message);
     console.log(
       "Status ",
       EE.status,
-      " |Error Cod. ",
+      " | Error Cod. ",
       EE.code,
-      "|",
+      " | ",
       EE.message
     );
-    return EE;
+    return { success: false, message: EE.message }; // Corrección del retorno de errores
   }
 };
 
@@ -184,7 +197,7 @@ const editaSkater = async (email, nombre, password, anos, esp) => {
 const validaLogin = async (email, password) => {
   try {
     const result = await pool.query({
-      text: `SELECT * FROM ${tabla} WHERE email = $1 AND password = $2`,
+      text: `SELECT id FROM ${tabla} WHERE email = $1 AND password = $2`,
       values: [email, password],
       });
       //console.log(result.rows[0]);
@@ -192,7 +205,8 @@ const validaLogin = async (email, password) => {
         console.log('Datos de acceso inválidos, por favor reintente.');
         return null; 
         } else {
-          return {email,password};
+          const {id} = result.rows[0];
+          return {id,email,password};
           }
           } catch (error) {
             console.log("Error al validar el usuario");

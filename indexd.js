@@ -73,7 +73,6 @@ app.engine(
 app.set("view engine", "handlebars");
 
 
-
 // Rutas asociadas a los handlebars
 app.get("/", async (req, res) => {
     try {
@@ -102,71 +101,6 @@ app.get("/registro", (req, res) => {
     res.render("Registro");
 });
 
-
-
-app.get("/login", (req, res) => {
-    res.render("Login");
-});
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
- // Valido que el email y el password se ingresen
- if (!email || !password) {
-    return res.status(400).send({
-        error: "Debe proporcionar el correo electrónico y la contraseña.",
-        code: 400,
-      });
-  }
-  try {
-    skater1 = await validaLogin(email, password); // Llamada a la función de consulta bd para validar usuario
-    console.log("Skater1:", JSON.stringify(skater1));
-    
-    if (!skater1) {
-      return res.status(401).send({
-        error: "Debe proporcionar todos los valores correctamente para ingresar.",
-        code: 401,
-      });
-    } else {
-      const token = jwt.sign({
-        skater: skater1}, secretKey); //Genero el token con los datos del skater
-      //res.status(200).send(token);
-      res.status(200).send(token);
-    } //envío el token como respuesta
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({
-      error: `Algo salió mal... ${e}`,
-      code: 500,
-    });
-  }
-});
-
-// app.get("/perfil", (req, res) => {
-//     const token  = req.query.token;
-//     if (!token) {
-//         res.status(401).send(`
-//             <script>
-//                 alert("No existe el token, no está Autorizado para acceder");
-//                 window.location.href = '${"/"}';
-//             </script>`);
-//     }else{ //verifico token
-//          jwt.verify(token, secretKey, (err, skater) => {
-//         if (err) {
-//             res.status(403).send(`
-//                 <script>
-//                     alert("Token Inválido, probablememte ya expiró");
-//                     window.location.href = '${"/"}';
-//                 </script>`);
-//         } else {
-//             //const skater = skater.skater;
-//             console.log("ska:",skater);
-//             res.render("Perfil", skater);
-//             }
-//             });
-//             }
-//             });
-
 app.get("/perfil", (req, res) => {
     const { token } = req.query
     jwt.verify(token, secretKey, (err, skater) => {
@@ -177,11 +111,48 @@ app.get("/perfil", (req, res) => {
                 code: 500
             })
         } else {
-            res.render("Perfil", skater);
+            res.render("Perfil", { skater });
         }
     })
 });
 
+app.get("/login", (req, res) => {
+    res.render("Login");
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  // Valido que el email y el password se ingresen
+  if (!email || !password) {
+    return res.status(400).send({
+      error: "Debe proporcionar el correo electrónico y la contraseña.",
+      code: 400,
+    });
+  }
+
+  try {
+    const skater = await validaLogin(email, password); // Llamada a la función de consulta bd para validar usuario
+    console.log("Skater:", JSON.stringify(skater));
+
+    if (!skater) {
+      return res.status(401).send({
+        error:
+          "Debe proporcionar todos los valores correctamente para ingresar.",
+        code: 401,
+      });
+    } else {
+      const token = jwt.sign(skater, secretKey); //Genero el token con los datos del skater
+      res.status(200).send(token);
+    } //envío el token como respuesta
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({
+      error: `Algo salió mal... ${e}`,
+      code: 500,
+    });
+  }
+});
 
 app.get("/Admin", async (req, res) => {
     try {
@@ -195,7 +166,7 @@ app.get("/Admin", async (req, res) => {
 });
 
 
-// ************************ API REST de Skaters *******************
+// API REST de Skaters
 
 // app.get("/skaters", async (req, res) => {
 //     try {
@@ -210,8 +181,6 @@ app.get("/Admin", async (req, res) => {
 //         })
 //     };
 // });
-
-// ******** Ruta GET /skaters para obtener el listado de todos los inscritos *************
 
 app.get("/skaters", async (req, res) => {
     try {
@@ -236,7 +205,6 @@ app.get("/skaters", async (req, res) => {
     }
 });
 
-//*********** Ruta POST /skaters para registrar un nuevo participante ***********
 // app.post("/skaters", async (req, res) => {
 //     const { email, nombre, password, anos, esp} = req.body;
 //     if (!email || !nombre || !password || !anos || !esp) {
@@ -390,19 +358,22 @@ app.post("/skaters", async (req, res) => {
 });
    
 
-// **************** ruta PUT /Skaters para editar un participante
+// ruta PUT /Skaters para editar un participante
 
 app.put("/skaters", async (req, res) => {
     const {id, nombre,anos_experiencia, especialidad} = req.body;
     console.log("Valor del body: ", id, nombre,anos_experiencia, especialidad);
     try {
-        const skaterB = await editaSkater(id,nombre,anos_experiencia, especialidad);
-        return res.send(`
-                <script>
-                alert("${skaterB.message}");
-                window.location.href = '${"/"}';
-                </script>
-            `);
+        const skaterB = skaters.findIndex((s) => s.id == id);
+//        if (skaterB) {
+           skaters[skaterB].nombre = nombre;
+           skaters[skaterB].anos_experiencia =anos_experiencia;
+           skaters[skaterB].especialidad = especialidad;
+            res.status(200).send("Datos actualizados con éxito");
+        // } else {
+        //     res.status(400).send("No existe este Skater");
+        // }
+        
     } catch (e) {
         res.status(500).send({
             error: `Algo salió mal... ${e}`,
