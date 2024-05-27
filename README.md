@@ -39,7 +39,7 @@ consultarla, editar participantes y su estado a la vez que tambien se pueden eli
     ```
 2. Instalar dependencias:
     ```sh
-    npm install
+    npm i
     ```
 3. Configurar la base de datos utilizando el archivo `skatepark.sql`.
 
@@ -47,7 +47,7 @@ consultarla, editar participantes y su estado a la vez que tambien se pueden eli
 
 Ejecutar la aplicación:
 ```sh
-npm start
+nodemon index
 
 Archivos Clave
 index.js
